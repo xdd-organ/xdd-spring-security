@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+	
+	<security:http pattern="/login.jsp" security="none"/>
+	
+	
+	<!-- 配置需要拦截的 URL, 以及访问这些 URL 需要具备哪些权限 -->
+	<security:http auto-config="true">
+		<security:intercept-url pattern="/admin.jsp" access="ROLE_USER"/>
+		
+		<!-- 配置登录的表单页面 -->
+		<security:form-login 
+			login-page="/login.jsp"
+			password-parameter="password"
+			username-parameter="username"
+			default-target-url="/index.jsp"
+			always-use-default-target="true"
+			authentication-failure-url="/index.jsp"
+			login-processing-url="/security/user/login.action" />
+		
+		<!-- 配置登出 -->
+		<security:logout logout-url="/logout"
+			logout-success-url="/index.jsp"
+			invalidate-session="true"/>
+		
+		<!-- 用户自己过滤器 -->
+		<security:custom-filter ref="myFilter" before="FILTER_SECURITY_INTERCEPTOR"/>
+		
+	</security:http>
+	
+	<!-- 自实现的 UserDetailsService 的实现类 -->
+	<bean id="userDetailsService" class="com.java.xdd.springsecurity.service.impl.UserServiceImpl"></bean>
+	 
+	<security:authentication-manager alias="authenticationManager">
+		<!-- user-service-ref 执行UserDetailsService 的实现类 Bean  -->
+		<security:authentication-provider user-service-ref="userDetailsService"/>
+	</security:authentication-manager>
+	
+	
+	<bean id="myFilter" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="rejectPublicInvocations" value="false" />
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="accessDecisionManager" />
+		<property name="securityMetadataSource" ref="adminSecurityMetadataSource" />
+	</bean>
+	
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<constructor-arg index="0">
+			<list>
+				<bean class="org.springframework.security.access.vote.RoleVoter" />
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="adminSecurityMetadataSource" class="com.java.xdd.springsecurity.filter.MyInvocationSecurityMetadataSource">
+	</bean>
+</beans>

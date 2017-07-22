@@ -17,10 +17,12 @@ public class UserServiceImpl implements UserDetailsService {
 		System.out.println(username);
 		
 		User user = new User();
-		user.setUsername(username);
+		user.setUsername("admin");
+		user.setPassword("123456");
 		Collection<GrantedAuthority> authorities = new HashSet<>();
 		UserRole role = new UserRole();
 		role.setRole("ROLE_USER");
+		role.setRole("ROLE_ADMIN");
 		authorities.add(role);
 		user.setAuthorities(authorities);
 		return user;

@@ -30,6 +30,6 @@
 		</property>
 	</bean>
 
-	<!--<import resource="classpath:spring/applicationContext-security.xml"/>-->
+	<import resource="classpath:spring/applicationContext-security.xml"/>
 
 </beans>

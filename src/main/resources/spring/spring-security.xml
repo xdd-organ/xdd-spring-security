@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:security="http://www.springframework.org/schema/security" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 	                    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-                        http://www.springframework.org/schema/security
+                        http://www.springframework.org/schema/security 
                         http://www.springframework.org/schema/security/spring-security-3.2.xsd">
-
 	<!-- spring-security框架的核心配置 -->
+	<!-- 无需进行权限验证的路径 -->
 	<security:http pattern="/admin/**" security="none" />
 
+	<!-- 必须放在<security:http>前，用于jsp页面中的authority标签能正确引用应用的filterSecurityInterceptor -->
 	<bean id="webInvocationPrivilegeEvaluator" class="org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator" primary="true">
 		<constructor-arg name="securityInterceptor" ref="filterSecurityInterceptor" />
 	</bean>
-
+	
 	<bean id="requestCache" class="com.ibm.sc.service.security.impl.ReturnUrlHttpSessionRequestCache">
 		<property name="targetUrlParameter" value="return_url" />
 	</bean>
@@ -31,20 +32,20 @@
 		<!-- default-target-url 登录成功后跳转的URL -->
 		<!-- always-use-default-target 是否登录后必须访问default-target-url -->
 		<!-- authentication-failure-url 登录失败后跳转的URL -->
-
+		
 		<!-- 	自定义登录页面
-				login-page="/sys/login.action" 自定义登录页url,默认为/login
+				login-page="/sys/login.action" 自定义登录页url,默认为/login 
 				login-processing-url="/admin/loginVerify" 登录请求拦截的url,也就是form表单提交时指定的action
 				authentication-failure-url="/sys/login.action" 登录失败后跳转的url
-				authentication-success-handler-ref="successHandler" 指向一个successHandler用于处理认证成功的请求，,不能和default-target-url还有always-use-default-target同时使用
+				authentication-success-handler-ref="successHandler" 指向一个successHandler用于处理认证成功的请求，,不能和default-target-url还有always-use-default-target同时使用 
 		-->
 		<security:form-login login-page="/sys/login.action" login-processing-url="/admin/loginVerify" authentication-failure-url="/sys/login.action" authentication-success-handler-ref="successHandler" />
 
 		<!--security:http-basic /-->
-
+		
 		<!-- 定义记住我功能，通过user-service-ref指定将要使用的UserDetailsService-->
 		<security:remember-me key="e37f8888-0ooo-22dd-bd0b-9900211c9a66" />
-
+		
 		<!-- 	登出配置
 				logout-url="/logout" 通过logout元素的logout-url属性来改变退出登录的默认地址。
 				invalidate-session="true" 销毁session
@@ -53,7 +54,7 @@
 		<security:logout logout-url="/logout" invalidate-session="true" logout-success-url="/sys/login.action" />
 		<security:access-denied-handler error-page="/error_403.jspx" />
 		<security:custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="filterSecurityInterceptor" />
-
+		
 		<!-- 	session管理
 				invalid-session-url="/sys/login.action" 指定使用已经超时的sessionId进行请求需要重定向的页面
 				session-authentication-error-url="/sys/login.action" 如果你之前已经登录了，然后想再次登录，那么系统将会拒绝你的登录，如果你还是想重定向一个指定的页面
@@ -62,7 +63,7 @@
 		<security:session-management invalid-session-url="/sys/login.action" session-authentication-error-url="/sys/login.action" session-fixation-protection="newSession">
 			<!-- 	控制session数量即控制用户同时登录数
 					使用该配置需在web.xml文件添加
-					Spring Security会话控制
+					Spring Security会话控制 
 					<listener>
 						<listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
 					</listener>
@@ -79,19 +80,19 @@
 		<security:authentication-provider ref="loginAuthProvider">
 		</security:authentication-provider>
 	</security:authentication-manager>
-
+	
 	<bean id="loginAuthProvider" class="com.ibm.sc.service.security.impl.LoginAsAuthenticationProvider">
 		<property name="userDetailsService" ref="userDetailsService"></property>
 		<property name="passwordEncoder" >
 			<bean class="org.springframework.security.authentication.encoding.PlaintextPasswordEncoder">
-				<!--  <property name="encodeHashAsBase64" value="false" />   -->
+			 <!--  <property name="encodeHashAsBase64" value="false" />   -->
 			</bean>
 		</property>
-		<!-- <property name="saltSource">
-        通过动态的加密盐进行加密，该配置通过用户名提供加密盐, 通过UserDetails的getUsername()方式
-          <bean class="org.springframework.security.authentication.dao.ReflectionSaltSource">
-            <property name="userPropertyToUse" value="getUsername" />
-         </bean>
+		<!-- <property name="saltSource">   
+        通过动态的加密盐进行加密，该配置通过用户名提供加密盐, 通过UserDetails的getUsername()方式   
+          <bean class="org.springframework.security.authentication.dao.ReflectionSaltSource">   
+            <property name="userPropertyToUse" value="getUsername" />   
+         </bean> 
    		 </property>    -->
 	</bean>
 
@@ -114,7 +115,7 @@
 	<!-- 定义权限、资源关系 -->
 	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
 		<property name="rejectPublicInvocations" value="false" />
-		<!-- 用户拥有的权限 -->
+		<!-- 用户拥有的权限 --> 
 		<property name="authenticationManager" ref="authenticationManager" />
 		<!-- 用户是否拥有所请求资源的权限 -->
 		<property name="accessDecisionManager" ref="accessDecisionManager" />

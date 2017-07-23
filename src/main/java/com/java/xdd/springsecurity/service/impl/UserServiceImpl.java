@@ -9,7 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import com.java.xdd.springsecurity.domain.User;
 import com.java.xdd.springsecurity.domain.UserRole;
+import org.springframework.stereotype.Service;
 
+@Service("userDetailsService")
 public class UserServiceImpl implements UserDetailsService {
 
 	@Override

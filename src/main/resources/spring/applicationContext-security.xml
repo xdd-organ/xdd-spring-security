@@ -1,78 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:security="http://www.springframework.org/schema/security" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
-	                    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	                    http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
                         http://www.springframework.org/schema/security
-                        http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+                        http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
 	<!-- spring-security框架的核心配置 -->
-	<security:http pattern="/admin/**" security="none" />
+	<security:http pattern="/demo/test1" security="none" />
+	<security:http pattern="/login.jsp" security="none" />
 
-	<bean id="webInvocationPrivilegeEvaluator" class="org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator" primary="true">
-		<constructor-arg name="securityInterceptor" ref="filterSecurityInterceptor" />
-	</bean>
-
-	<bean id="requestCache" class="com.ibm.sc.service.security.impl.ReturnUrlHttpSessionRequestCache">
-		<property name="targetUrlParameter" value="return_url" />
-	</bean>
-
-	<!-- servlet-api-provision 禁止保存登录之前的请求 -->
-	<!-- access-denied-page 访问未授权时的显示页面 -->
-	<!-- 	session管理
-			auto-config="true" 自动生成一个登陆界面，与<security:form-login>配合使用
-			access-decision-manager-ref="accessDecisionManager" 使用自己的权限验证规则，所以这里要配置access-decision-manager-ref
-			servlet-api-provision="false" 默认true，保存没有登录之前的请求
-			disable-url-rewriting="true" 配置禁止url不添加jsessionid (不让URLappend了JSESSIONID)
-	-->
-	<security:http auto-config="true" access-decision-manager-ref="accessDecisionManager" servlet-api-provision="false" disable-url-rewriting="true" >
-		<!-- 缓存机制,不清楚 -->
-		<security:request-cache ref="requestCache"/>
-		<!-- login-page 登录页面 -->
-		<!-- default-target-url 登录成功后跳转的URL -->
-		<!-- always-use-default-target 是否登录后必须访问default-target-url -->
-		<!-- authentication-failure-url 登录失败后跳转的URL -->
-
-		<!-- 	自定义登录页面
-				login-page="/sys/login.action" 自定义登录页url,默认为/login
-				login-processing-url="/admin/loginVerify" 登录请求拦截的url,也就是form表单提交时指定的action
-				authentication-failure-url="/sys/login.action" 登录失败后跳转的url
-				authentication-success-handler-ref="successHandler" 指向一个successHandler用于处理认证成功的请求，,不能和default-target-url还有always-use-default-target同时使用
-		-->
-		<security:form-login login-page="/sys/login.action" login-processing-url="/admin/loginVerify" authentication-failure-url="/sys/login.action" authentication-success-handler-ref="successHandler" />
-
-		<!--security:http-basic /-->
+	<security:http use-expressions="true" entry-point-ref="myAuthenticationEntryPoint">
+		<security:access-denied-handler error-page="/demo/to500" />
+		<!-- 使用自定義的登陸，需要注释该标签 security:form-login -->
+		<security:custom-filter ref="usernameAndPassword" position="FORM_LOGIN_FILTER"/>
+		<security:custom-filter ref="filterSecurityInterceptor" before="FILTER_SECURITY_INTERCEPTOR" />
 
 		<!-- 定义记住我功能，通过user-service-ref指定将要使用的UserDetailsService-->
 		<security:remember-me key="e37f8888-0ooo-22dd-bd0b-9900211c9a66" />
 
-		<!-- 	登出配置
-				logout-url="/logout" 通过logout元素的logout-url属性来改变退出登录的默认地址。
-				invalidate-session="true" 销毁session
-				logout-success-url="/sys/login.action" 指定成功退出登录后要重定向的URL。需要注意的是对应的URL应当是不需要登录就可以访问的。
-		-->
-		<security:logout logout-url="/logout" invalidate-session="true" logout-success-url="/sys/login.action" />
-		<security:access-denied-handler error-page="/error_403.jspx" />
-		<security:custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="filterSecurityInterceptor" />
+		<security:logout logout-url="/logout" invalidate-session="true" logout-success-url="/demo/logout" />
 
-		<!-- 	session管理
-				invalid-session-url="/sys/login.action" 指定使用已经超时的sessionId进行请求需要重定向的页面
-				session-authentication-error-url="/sys/login.action" 如果你之前已经登录了，然后想再次登录，那么系统将会拒绝你的登录，如果你还是想重定向一个指定的页面
-				session-fixation-protection="newSession" session 固定攻击保护，表示重新创建一个新的session，但是不copy原session拥有的attribute。
-		-->
-		<security:session-management invalid-session-url="/sys/login.action" session-authentication-error-url="/sys/login.action" session-fixation-protection="newSession">
-			<!-- 	控制session数量即控制用户同时登录数
-					使用该配置需在web.xml文件添加
-					Spring Security会话控制
-					<listener>
-						<listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
-					</listener>
-					max-sessions="1" 同时登陆数，即session数量，1:：session数量，不允许同时登陆,但是sessionRegistry存储的时候使用的是Hash的数据结构，所以UserDetails实现类必须重写equals和hashCode。
-					error-if-maximum-exceeded="true" 设置error-if-maximum-exceeded为true后如果你之前已经登录了，然后想再次登录，那么系统将会拒绝你的登录
-					expired-url="/sys/login.action" 指定当用户尝试使用一个由于其再次登录导致session超时的session时所要跳转的页面。同时需要注意设置该URL为不需要进行认证。
-			-->
-			<security:concurrency-control max-sessions="999" error-if-maximum-exceeded="true" expired-url="/sys/login.action" />
+		<security:session-management invalid-session-url="/demo/toLogin" session-authentication-error-url="/demo/login" session-fixation-protection="newSession">
+			<security:concurrency-control max-sessions="2" error-if-maximum-exceeded="true" expired-url="/demo/toLogin" />
 		</security:session-management>
 	</security:http>
+
+	<!-- 未登录的切入点 -->
+	<!-- 需要有个切入点 -->
+	<bean id="myAuthenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<constructor-arg index="0" value="/login.jsp"/>
+	</bean>
+
+	<bean id="usernameAndPassword" class="com.java.xdd.springsecurity.filter.MyAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager"/>
+
+	</bean>
+
+	<!--一个自定义的filter，必须包含 authenticationManager,accessDecisionManager,securityMetadataSource三个属性，我们的所有控制将在这三个类中实现，解释详见具体配置 -->
+	<!--<bean id="myFilterSecurityInterceptor" class="com.java.xdd.springsecurity.filter.MyFilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="myAccessDecisionManager" />
+		&lt;!&ndash;<property name="securityMetadataSource" ref="securityMetadataSource" />&ndash;&gt;
+	</bean>-->
+
+	<!--在这个类中，你就可以从数据库中读入用户的密码，角色信息，是否锁定，账号是否过期等 -->
+	<!--访问决策器，决定某个用户具有的角色，是否有足够的权限去访问某个资源 -->
+	<bean id="myAccessDecisionManager"  class="com.java.xdd.springsecurity.filter.MyAccessDecisionManager" />
+	<!--资源源数据定义，将所有的资源和权限对应关系建立起来，即定义某一资源可以被哪些角色访问 -->
+	<bean id="securityMetadataSource" class="com.java.xdd.springsecurity.filter.MySecurityMetadataSource" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	<!-- 后台管理权限认证 -->
 	<security:authentication-manager alias="authenticationManager">
@@ -80,8 +79,8 @@
 		</security:authentication-provider>
 	</security:authentication-manager>
 
-	<bean id="loginAuthProvider" class="com.ibm.sc.service.security.impl.LoginAsAuthenticationProvider">
-		<property name="userDetailsService" ref="userDetailsService"></property>
+	<bean id="loginAuthProvider" class="com.java.xdd.springsecurity.provider.LoginAsAuthenticationProvider">
+		<property name="userDetailsService" ref="userDetailsService"/>
 		<property name="passwordEncoder" >
 			<bean class="org.springframework.security.authentication.encoding.PlaintextPasswordEncoder">
 				<!--  <property name="encodeHashAsBase64" value="false" />   -->
@@ -100,7 +99,7 @@
 		alwaysUseDefaultTargetUrl 总是使用默认目标页面
 	-->
 	<bean id="successHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
-		<property name="defaultTargetUrl" value="/sys/user!main.action" />
+		<property name="defaultTargetUrl" value="/demo/success" />
 		<property name="alwaysUseDefaultTargetUrl" value="false" />
 	</bean>
 
@@ -108,7 +107,7 @@
 			defaultFailureUrl 默认登录失败跳转目标页面
 	-->
 	<bean id="failureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
-		<property name="defaultFailureUrl" value="/sys/login.action" />
+		<property name="defaultFailureUrl" value="/demo/failure" />
 	</bean>
 
 	<!-- 定义权限、资源关系 -->
@@ -123,12 +122,12 @@
 	</bean>
 
 	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
-		<property name="decisionVoters">
+		<constructor-arg index="0">
 			<list>
-				<bean class="com.ibm.sc.service.security.impl.RoleVoter" />
+				<bean class="com.java.xdd.springsecurity.voter.RoleVoter" />
 				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
 			</list>
-		</property>
+		</constructor-arg>
 	</bean>
 
 </beans>

@@ -2,6 +2,7 @@ package com.java.xdd.test.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -44,9 +45,37 @@ public class DemoController {
         return "success";
     }
 
-    //登录页面
-    @RequestMapping(value = "login")
+    //403
+    @RequestMapping(value = "to403")
+    @ResponseBody
+    public String to403() {
+        return "403";
+    }
+
+    //500
+    @RequestMapping(value = "to500")
+    @ResponseBody
+    public String to500() {
+        return "500";
+    }
+
+    //失败访问
+    @RequestMapping(value = "login", method = RequestMethod.POST)
+    @ResponseBody
     public String login() {
+        return "login";
+    }
+
+    //登出
+    @RequestMapping(value = "logout")
+    @ResponseBody
+    public String logout() {
+        return "logout";
+    }
+
+    //去登录页面
+    @RequestMapping(value = "toLogin")
+    public String toLogin() {
         return "login";
     }
 

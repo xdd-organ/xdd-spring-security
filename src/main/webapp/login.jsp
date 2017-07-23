@@ -8,7 +8,7 @@
     登陆失败<br>
     ${sessionScope['SPRING_SECURITY_LAST_EXCEPTION'].message}
 </div>
-<form action="${pageContext.request.contextPath}/demo/login" method="post"
+<form action="${pageContext.request.contextPath}/j_spring_security_check" method="post"
       style="width:260px;text-align:center;">
     <fieldset>
         <legend>登陆</legend>
